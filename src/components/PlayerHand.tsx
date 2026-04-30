@@ -14,6 +14,10 @@ type PlayerHandProps = {
 
 export function PlayerHand({ title, player, reveal, interactive, onToggleHold }: PlayerHandProps) {
   const handLabel = reveal && player.dice ? safeHandLabel(player.dice) : null;
+  const matched = player.dice
+    ? matchedIndices(player.dice)
+    : ([false, false, false, false, false] as const);
+  const showHeld = !player.hasRerolled;
 
   return (
     <Card.Root className="flex flex-col gap-3 p-4">
@@ -26,7 +30,8 @@ export function PlayerHand({ title, player, reveal, interactive, onToggleHold }:
           <Die
             key={i}
             value={value}
-            held={player.held[i]}
+            held={showHeld && player.held[i]}
+            matched={matched[i]}
             interactive={interactive && !player.hasRerolled}
             onClick={interactive && onToggleHold ? () => onToggleHold(i) : undefined}
           />
@@ -34,6 +39,19 @@ export function PlayerHand({ title, player, reveal, interactive, onToggleHold }:
       </Card.Content>
     </Card.Root>
   );
+}
+
+function matchedIndices(dice: DiceSet): boolean[] {
+  const counts = new Map<number, number>();
+  for (const d of dice) counts.set(d, (counts.get(d) ?? 0) + 1);
+
+  const isSmallStraight = [1, 2, 3, 4, 5].every((v) => counts.has(v));
+  const isBigStraight = [2, 3, 4, 5, 6].every((v) => counts.has(v));
+  if (isSmallStraight || isBigStraight) {
+    return [true, true, true, true, true];
+  }
+
+  return dice.map((d) => (counts.get(d) ?? 0) >= 2);
 }
 
 function safeHandLabel(dice: DiceSet): string {

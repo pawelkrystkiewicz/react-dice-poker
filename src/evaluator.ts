@@ -43,6 +43,7 @@ export function evaluateHand(_dice: DiceSet): HandResult {
   const fives = []
 
   for (const [diceValue, count] of entries) {
+
     switch (count) {
       case 2:
         pairs.push(diceValue)
@@ -115,7 +116,7 @@ export function evaluateHand(_dice: DiceSet): HandResult {
       tieBreakers: [6],
     }
   }
-  
+
   return {
     class: 'nothing',
     tieBreakers,
