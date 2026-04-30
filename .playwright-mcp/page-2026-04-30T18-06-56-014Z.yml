@@ -1,0 +1,56 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Dice Poker" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Witcher 1 rules — best of 3
+    - button "New match" [ref=e8]
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]: You
+      - generic [ref=e12]: "0"
+    - generic [ref=e13]:
+      - text: Game 1 / 3
+      - generic [ref=e14]: First to 2 wins
+    - generic [ref=e15]:
+      - generic [ref=e16]: Opponent
+      - generic [ref=e17]: "0"
+  - generic [ref=e18]:
+    - generic [ref=e19]:
+      - generic [ref=e20]: Difficulty
+      - generic [ref=e21]:
+        - button "Easy" [ref=e22]
+        - button "Medium" [ref=e23]
+        - button "Hard" [ref=e24]
+    - button "Roll dice" [ref=e25]
+  - generic [ref=e26]:
+    - heading "You" [level=3] [ref=e28]
+    - generic [ref=e29]:
+      - button "Die" [disabled] [ref=e30]:
+        - generic [ref=e31]: "?"
+      - button "Die" [disabled] [ref=e32]:
+        - generic [ref=e33]: "?"
+      - button "Die" [disabled] [ref=e34]:
+        - generic [ref=e35]: "?"
+      - button "Die" [disabled] [ref=e36]:
+        - generic [ref=e37]: "?"
+      - button "Die" [disabled] [ref=e38]:
+        - generic [ref=e39]: "?"
+  - generic [ref=e40]:
+    - heading "Opponent" [level=3] [ref=e42]
+    - generic [ref=e43]:
+      - button "Die" [disabled] [ref=e44]:
+        - generic [ref=e45]: "?"
+      - button "Die" [disabled] [ref=e46]:
+        - generic [ref=e47]: "?"
+      - button "Die" [disabled] [ref=e48]:
+        - generic [ref=e49]: "?"
+      - button "Die" [disabled] [ref=e50]:
+        - generic [ref=e51]: "?"
+      - button "Die" [disabled] [ref=e52]:
+        - generic [ref=e53]: "?"
+  - generic [ref=e54]:
+    - text: Hand evaluator is unimplemented — winners won't be detected until you write
+    - code [ref=e55]: evaluateHand()
+    - text: in
+    - code [ref=e56]: src/evaluator.ts
+    - text: .

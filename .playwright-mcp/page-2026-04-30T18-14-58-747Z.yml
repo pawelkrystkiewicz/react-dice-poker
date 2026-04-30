@@ -1,0 +1,52 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Dice Poker" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Witcher 1 rules — best of 3
+    - button "New match" [ref=e8]
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]: You
+      - generic [ref=e12]: "0"
+    - generic [ref=e13]:
+      - text: Game 1 / 3
+      - generic [ref=e14]: First to 2 wins
+    - generic [ref=e15]:
+      - generic [ref=e16]: Opponent
+      - generic [ref=e17]: "0"
+  - generic [ref=e19]:
+    - generic [ref=e20]: Difficulty
+    - group [ref=e21]:
+      - button "Easy" [disabled] [ref=e22]
+      - button "Medium" [disabled] [pressed] [ref=e23]
+      - button "Hard" [disabled] [ref=e24]
+  - generic [ref=e26]:
+    - heading "You" [level=3] [ref=e28]
+    - generic [ref=e29]:
+      - button "Die showing 5" [ref=e57] [cursor=pointer]
+      - button "Die showing 2" [ref=e63] [cursor=pointer]
+      - button "Die showing 5" [ref=e66] [cursor=pointer]
+      - button "Die showing 4" [ref=e72] [cursor=pointer]
+      - button "Die showing 1" [ref=e77] [cursor=pointer]
+  - generic [ref=e40]:
+    - heading "Opponent" [level=3] [ref=e42]
+    - generic [ref=e43]:
+      - button "Die showing 3" [disabled] [ref=e79]
+      - button "Die showing 4" [disabled] [ref=e83]
+      - button "Die showing 1" [disabled] [ref=e88]
+      - button "Die showing 2" [disabled] [ref=e90]
+      - button "Die showing 5" [disabled] [ref=e93]
+  - generic [ref=e99]:
+    - paragraph [ref=e100]:
+      - text: Tap dice to mark them as
+      - strong [ref=e101]: held
+      - text: ; the rest will be re-rolled.
+    - generic [ref=e102]:
+      - button "Re-roll unheld" [ref=e103]
+      - button "Keep all" [ref=e104]
+  - generic [ref=e54]:
+    - text: Hand evaluator is unimplemented — winners won't be detected until you write
+    - code [ref=e55]: evaluateHand()
+    - text: in
+    - code [ref=e56]: src/evaluator.ts
+    - text: .

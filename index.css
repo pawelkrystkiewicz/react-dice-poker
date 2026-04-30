@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "chunks-ui/theme.css";
+
+@source './src';
+/* Scan chunks-ui dist for component class names */
+@source 'node_modules/chunks-ui/dist';
+html,
+body,
+#root {
+  height: 100%;
+}
