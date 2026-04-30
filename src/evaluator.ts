@@ -1,5 +1,5 @@
-import type { DiceSet, HandResult } from "./types";
-
+import type { DiceSet, HandResult } from './types'
+const desc = (a: number, b: number) => b - a
 /**
  * STUB — implement this yourself.
  *
@@ -30,7 +30,96 @@ import type { DiceSet, HandResult } from "./types";
  *       nothing     -> dice values sorted descending
  */
 export function evaluateHand(_dice: DiceSet): HandResult {
-  throw new Error("evaluateHand: not implemented yet");
+  const counts = new Map<number, number>()
+  for (const d of _dice) counts.set(d, (counts.get(d) ?? 0) + 1)
+
+  const tieBreakers = [..._dice].sort(desc)
+  const entries = [...counts.entries()].sort()
+  const uniqueValues = [...new Set(_dice)].sort(desc)
+
+  const pairs = []
+  const threes = []
+  const fours = []
+  const fives = []
+
+  for (const [diceValue, count] of entries) {
+    switch (count) {
+      case 2:
+        pairs.push(diceValue)
+        break
+      case 3:
+        threes.push(diceValue)
+        break
+      case 4:
+        fours.push(diceValue)
+        return {
+          class: 'four',
+          tieBreakers: [diceValue, ...uniqueValues.filter(v => v !== diceValue)],
+        }
+      case 5:
+        fives.push(diceValue)
+        return {
+          class: 'five',
+          tieBreakers: [diceValue],
+        }
+    }
+  }
+
+  if (pairs.length === 2) {
+    const [p1, p2] = pairs.sort(desc)
+    return {
+      class: 'two-pairs',
+      tieBreakers: [p1, p2, ...uniqueValues.filter(v => v !== p1 && v !== p2)],
+    }
+  }
+
+  if (threes.length === 1 && pairs.length === 1) {
+    const [tripleValue] = threes
+    const [pairValue] = pairs
+    return {
+      class: 'full-house',
+      tieBreakers: [tripleValue, pairValue],
+    }
+  }
+
+  if (threes.length === 1) {
+    const [tripleValue] = threes
+    return {
+      class: 'threes',
+      tieBreakers: [tripleValue, ...uniqueValues.filter(v => v !== tripleValue)],
+    }
+  }
+
+  if (pairs.length === 1) {
+    const [pairValue] = pairs
+    return {
+      class: 'pair',
+      tieBreakers: [pairValue, ...uniqueValues.filter(v => v !== pairValue)],
+    }
+  }
+
+  const isSmallStraight = [1, 2, 3, 4, 5].every(v => counts.has(v))
+
+  if (isSmallStraight) {
+    return {
+      class: 'small-straight',
+      tieBreakers: [5],
+    }
+  }
+
+  const isBigStraight = [2, 3, 4, 5, 6].every(v => counts.has(v))
+
+  if (isBigStraight) {
+    return {
+      class: 'big-straight',
+      tieBreakers: [6],
+    }
+  }
+  
+  return {
+    class: 'nothing',
+    tieBreakers,
+  }
 }
 
 /**
@@ -41,28 +130,28 @@ export function evaluateHand(_dice: DiceSet): HandResult {
  * you only need to write `evaluateHand`.
  */
 export function compareHands(a: HandResult, b: HandResult): number {
-  const ra = handRank(a.class);
-  const rb = handRank(b.class);
-  if (ra !== rb) return ra - rb;
+  const ra = handRank(a.class)
+  const rb = handRank(b.class)
+  if (ra !== rb) return ra - rb
   for (let i = 0; i < Math.max(a.tieBreakers.length, b.tieBreakers.length); i++) {
-    const av = a.tieBreakers[i] ?? 0;
-    const bv = b.tieBreakers[i] ?? 0;
-    if (av !== bv) return av - bv;
+    const av = a.tieBreakers[i] ?? 0
+    const bv = b.tieBreakers[i] ?? 0
+    if (av !== bv) return av - bv
   }
-  return 0;
+  return 0
 }
 
-function handRank(c: HandResult["class"]): number {
-  const ranks: Record<HandResult["class"], number> = {
+function handRank(c: HandResult['class']): number {
+  const ranks: Record<HandResult['class'], number> = {
     nothing: 0,
     pair: 1,
-    "two-pairs": 2,
+    'two-pairs': 2,
     threes: 3,
-    "small-straight": 4,
-    "big-straight": 5,
-    "full-house": 6,
+    'small-straight': 4,
+    'big-straight': 5,
+    'full-house': 6,
     four: 7,
     five: 8,
-  };
-  return ranks[c];
+  }
+  return ranks[c]
 }
