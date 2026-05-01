@@ -1,5 +1,4 @@
 import type { DiceSet, HandResult } from './types'
-const desc = (a: number, b: number) => b - a
 
 const EMPTY_TIEBREAKERS: number[] = []
 const counts = new Uint8Array(7) // module scope, indices 0..6, slot 0 unused
@@ -34,11 +33,12 @@ const counts = new Uint8Array(7) // module scope, indices 0..6, slot 0 unused
  */
 
 export function evaluateHand(dice: DiceSet): HandResult {
-  // reset counts for this hand, reuse module-scope array to avoid allocations
   counts.fill(0)
 
-  let max = 0
-  const kickers: number[] = []
+  let maxRepeatedDiceFace = 0
+  let repeatedDiceFaceValue = 0
+  let mask = 0
+  let kicker4 = 1
 
   for (let i = 0; i < 5; i++) {
     const d = dice[i]
@@ -46,88 +46,78 @@ export function evaluateHand(dice: DiceSet): HandResult {
 
     const count = counts[d]
 
-    if (count > max) max = count
-
-    const exists = kickers.indexOf(d)
-
-    if (exists > -1) {
-      kickers.splice(exists, 1)
+    if (count > maxRepeatedDiceFace) {
+      maxRepeatedDiceFace = count
+      repeatedDiceFaceValue = d
     }
 
     if (count === 1) {
-      kickers.push(d)
+      kicker4 = d
     }
+
+    mask |= 1 << (d - 1)
   }
 
-  if (max === 5) {
+  if (maxRepeatedDiceFace === 5) {
     return {
       class: 'five',
-      tieBreakers: [counts.indexOf(5)], // which value is repeated 5 times
+      tieBreakers: [repeatedDiceFaceValue], // which value is repeated 5 times
     }
   }
 
-  if (max === 4) {
+  if (maxRepeatedDiceFace === 4) {
     return {
       class: 'four',
-      tieBreakers: [counts.indexOf(4), counts.indexOf(1)], // which value is repeated 4 times, then kicker
+      tieBreakers: [repeatedDiceFaceValue, kicker4], // which value is repeated 4 times, then kicker
     }
   }
 
+  const kickers = []
+  const pairs = []
 
+  for (let i = 6; i >= 1; i--) {
+    if (counts[i] === 1) {
+      kickers.push(i)
+    }
 
-  if (max === 3) {
-    const v = counts.indexOf(3)
-    const p = counts.indexOf(2)
-
-    if (p !== -1) {
-      return {
-        class: 'full-house',
-        tieBreakers: [v, p],
-      }
-    } else {
-      return {
-        class: 'threes',
-        tieBreakers: [v, kickers[0], kickers[1]],
-      }
+    if (counts[i] === 2) {
+      pairs.push(i)
     }
   }
 
-  if (max === 2) {
-    // only 1 or 2 pairs possible, so we can just loop once and check counts
-    const highestIdx = counts.lastIndexOf(2) //higher value idx
-    const lowestIdx = counts.indexOf(2)
-
-    // if we are already in pairs branch
-    // both can't be -1
-    if (lowestIdx !== highestIdx) {
-      return {
-        class: 'two-pairs',
-        tieBreakers: [highestIdx, lowestIdx, kickers[0]],
-      }
+  if (maxRepeatedDiceFace === 3 && pairs[0]) {
+    return {
+      class: 'full-house',
+      tieBreakers: [repeatedDiceFaceValue, pairs[0]],
     }
+  }
 
+  if (maxRepeatedDiceFace === 3) {
+    return {
+      class: 'threes',
+      tieBreakers: [repeatedDiceFaceValue, kickers[0], kickers[1]],
+    }
+  }
+
+  if (pairs[1]) {
+    return {
+      class: 'two-pairs',
+      tieBreakers: [pairs[0], pairs[1], kickers[0]],
+    }
+  }
+
+  if (pairs[0])
     return {
       class: 'pair',
-      tieBreakers: [highestIdx, kickers[0], kickers[1], kickers[2]],
-    }
-  }
-
-  let mask = 0
-  for (const d of dice) {
-    mask |= 1 << (d - 1)
-
-    if (mask === 0b011111) {
-      return { class: 'small-straight', tieBreakers: EMPTY_TIEBREAKERS }
+      tieBreakers: [pairs[0], kickers[0], kickers[1], kickers[2]],
     }
 
-    if (mask === 0b111110) {
-      return { class: 'big-straight', tieBreakers: EMPTY_TIEBREAKERS }
-    }
-  }
+  if (mask === 0b011111) return { class: 'small-straight', tieBreakers: EMPTY_TIEBREAKERS }
+  if (mask === 0b111110) return { class: 'big-straight', tieBreakers: EMPTY_TIEBREAKERS }
 
   return {
     class: 'nothing',
-    tieBreakers: dice.sort(desc),
+    tieBreakers: kickers,
   }
 }
 

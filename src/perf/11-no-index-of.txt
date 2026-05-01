@@ -1,0 +1,31 @@
+ ✓ src/evaluator.bench.ts > evaluateHand: per class 22190ms
+     name                       hz     min      max    mean     p75     p99    p995    p999     rme   samples
+   · nothing         22,639,817.64  0.0000   0.1220  0.0000  0.0000  0.0001  0.0001  0.0002  ±0.23%  11319909
+   · pair            17,741,367.08  0.0000   0.1614  0.0001  0.0001  0.0001  0.0001  0.0002  ±0.25%   8870684
+   · two-pairs       18,323,465.38  0.0000   0.2275  0.0001  0.0001  0.0001  0.0001  0.0002  ±0.12%   9161733
+   · threes          19,983,502.76  0.0000   3.0925  0.0001  0.0000  0.0001  0.0001  0.0002  ±1.23%   9991752
+   · small-straight  18,644,702.96  0.0000   0.2117  0.0001  0.0000  0.0001  0.0001  0.0002  ±0.38%   9322352
+   · big-straight    22,095,458.95  0.0000   0.2633  0.0000  0.0000  0.0001  0.0001  0.0002  ±0.43%  11047731
+   · full-house      21,282,053.15  0.0000   0.1967  0.0000  0.0000  0.0001  0.0001  0.0002  ±0.31%  10641027
+   · four            26,123,207.32  0.0000  12.7110  0.0000  0.0000  0.0000  0.0001  0.0002  ±5.00%  13061604
+   · five            26,905,394.06  0.0000   2.8816  0.0000  0.0000  0.0000  0.0001  0.0002  ±1.16%  13452698
+
+ ✓ src/evaluator.bench.ts > evaluateHand: aggregate 2184ms
+     name                                           hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · all 7776 ordered dice combinations       2,957.58  0.3037  0.5317  0.3381  0.3407  0.4372  0.4611  0.5202  ±0.34%     1479
+   · uniform random roll (single)        10,852,589.04  0.0000  0.2627  0.0001  0.0001  0.0002  0.0002  0.0003  ±0.27%  5426295
+
+ BENCH  Summary
+
+  five - src/evaluator.bench.ts > evaluateHand: per class
+    1.03x faster than four
+    1.19x faster than nothing
+    1.22x faster than big-straight
+    1.26x faster than full-house
+    1.35x faster than threes
+    1.44x faster than small-straight
+    1.47x faster than two-pairs
+    1.52x faster than pair
+
+  uniform random roll (single) - src/evaluator.bench.ts > evaluateHand: aggregate
+    3669.41x faster than all 7776 ordered dice combinations
