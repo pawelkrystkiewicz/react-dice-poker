@@ -1,0 +1,31 @@
+ ✓ src/evaluator.bench.ts > evaluateHand: per class 10645ms
+     name                      hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · nothing         8,767,019.09  0.0000  2.0198  0.0001  0.0001  0.0002  0.0003  0.0006  ±1.07%  4383512
+   · pair            6,301,294.19  0.0001  0.1271  0.0002  0.0002  0.0003  0.0003  0.0005  ±0.24%  3150648
+   · two-pairs       5,972,505.52  0.0001  0.1269  0.0002  0.0002  0.0003  0.0003  0.0005  ±0.20%  2986253
+   · threes          6,367,059.47  0.0001  5.1346  0.0002  0.0002  0.0003  0.0004  0.0006  ±2.13%  3183530
+   · small-straight  7,350,632.18  0.0000  2.9247  0.0001  0.0001  0.0003  0.0003  0.0005  ±1.17%  3675317
+   · big-straight    6,662,408.04  0.0001  2.3468  0.0002  0.0002  0.0003  0.0003  0.0004  ±1.21%  3331205
+   · full-house      6,128,829.94  0.0001  2.5544  0.0002  0.0002  0.0003  0.0003  0.0005  ±1.02%  3064415
+   · four            7,256,555.96  0.0000  0.0960  0.0001  0.0001  0.0002  0.0003  0.0005  ±0.17%  3628278
+   · five            7,843,252.27  0.0000  2.8347  0.0001  0.0001  0.0002  0.0003  0.0005  ±1.13%  3921627
+
+ ✓ src/evaluator.bench.ts > evaluateHand: aggregate 1632ms
+     name                                          hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · all 7776 ordered dice combinations        735.36  1.2917  1.4648  1.3599  1.3855  1.4560  1.4645  1.4648  ±0.28%      368
+   · uniform random roll (single)        4,415,214.95  0.0001  5.3730  0.0002  0.0002  0.0004  0.0005  0.0015  ±2.11%  2207608
+
+ BENCH  Summary
+
+  nothing - src/evaluator.bench.ts > evaluateHand: per class
+    1.12x faster than five
+    1.19x faster than small-straight
+    1.21x faster than four
+    1.32x faster than big-straight
+    1.38x faster than threes
+    1.39x faster than pair
+    1.43x faster than full-house
+    1.47x faster than two-pairs
+
+  uniform random roll (single) - src/evaluator.bench.ts > evaluateHand: aggregate
+    6004.14x faster than all 7776 ordered dice combinations

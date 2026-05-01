@@ -36,14 +36,30 @@ export function evaluateHand(dice: DiceSet): HandResult {
   // reset counts for this hand, reuse module-scope array to avoid allocations
   counts.fill(0)
 
-  for (const d of dice) {
-    // dice [index] is assigned value
-    // array[1] = count 1s
-    // array[2] = count 2s
+  const sorted = [...dice].sort(desc)
+
+  let max = 0
+  const kickers: number[] = []
+
+  for (const d of sorted) {
     counts[d]++
+
+    const count = counts[d]
+
+    if (count > max) max = count
+
+    const exists = kickers.indexOf(d)
+
+    if (exists > -1) {
+      kickers.splice(exists, 1)
+    }
+
+    if (count === 1) {
+      kickers.push(d)
+    }
   }
 
-  switch (Math.max(...counts)) {
+  switch (max) {
     case 5: {
       return {
         class: 'five',
@@ -59,47 +75,36 @@ export function evaluateHand(dice: DiceSet): HandResult {
     case 3: {
       const v = counts.indexOf(3)
       const p = counts.indexOf(2)
+
       if (p !== -1) {
         return {
           class: 'full-house',
           tieBreakers: [v, p],
         }
       } else {
-        const kickers = []
-        for (let i = 6; i > 0; i--) {
-          if (counts[i] === 1) kickers.push(i)
-        }
         return {
           class: 'threes',
-          tieBreakers: [v, ...kickers],
+          tieBreakers: [v, kickers[0], kickers[1]],
         }
       }
     }
     case 2: {
       // only 1 or 2 pairs possible, so we can just loop once and check counts
-      const indexes = counts.filter(c => c === 2)
+      const highestIdx = counts.lastIndexOf(2) //higher value idx
+      const lowestIdx = counts.indexOf(2)
 
-      if (indexes[1]) {
-        const pairs: number[] = []
-        let kicker = -1
-
-        for (let i = 6; i > 0; i--) {
-          if (counts[i] === 2) pairs.push(i)
-          else if (counts[i] === 1) kicker = i
-        }
+      // if we are already in pairs branch
+      // both can't be -1
+      if (lowestIdx !== highestIdx) {
         return {
           class: 'two-pairs',
-          tieBreakers: [pairs[0], pairs[1], kicker],
+          tieBreakers: [highestIdx, lowestIdx, kickers[0]],
         }
       }
 
       return {
         class: 'pair',
-        tieBreakers: [
-          //
-          counts.indexOf(2),
-          ...dice.filter(d => d !== counts.indexOf(2)).sort(desc),
-        ],
+        tieBreakers: [highestIdx, ...kickers],
       }
     }
     case 1:
@@ -107,8 +112,6 @@ export function evaluateHand(dice: DiceSet): HandResult {
         let mask = 0
         for (const d of dice) {
           mask |= 1 << (d - 1)
-          // small-straight: mask === 0b011111 (31)
-          // big-straight:   mask === 0b111110 (62)}
 
           if (mask === 0b011111) {
             return { class: 'small-straight', tieBreakers: [] }
@@ -124,7 +127,7 @@ export function evaluateHand(dice: DiceSet): HandResult {
 
   return {
     class: 'nothing',
-    tieBreakers: [...dice].sort(desc),
+    tieBreakers: sorted,
   }
 }
 
