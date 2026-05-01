@@ -1,8 +1,8 @@
 import type { DiceSet, HandResult } from './types'
 const desc = (a: number, b: number) => b - a
 
+const EMPTY_TIEBREAKERS: number[] = []
 const counts = new Uint8Array(7) // module scope, indices 0..6, slot 0 unused
-
 /**
  * STUB — implement this yourself.
  *
@@ -32,16 +32,16 @@ const counts = new Uint8Array(7) // module scope, indices 0..6, slot 0 unused
  *       straights   -> [highestDie]  (or [] — they only differ by class)
  *       nothing     -> dice values sorted descending
  */
+
 export function evaluateHand(dice: DiceSet): HandResult {
   // reset counts for this hand, reuse module-scope array to avoid allocations
   counts.fill(0)
 
-  const sorted = [...dice].sort(desc)
-
   let max = 0
   const kickers: number[] = []
 
-  for (const d of sorted) {
+  for (let i = 0; i < 5; i++) {
+    const d = dice[i]
     counts[d]++
 
     const count = counts[d]
@@ -59,75 +59,75 @@ export function evaluateHand(dice: DiceSet): HandResult {
     }
   }
 
-  switch (max) {
-    case 5: {
+  if (max === 5) {
+    return {
+      class: 'five',
+      tieBreakers: [counts.indexOf(5)], // which value is repeated 5 times
+    }
+  }
+
+  if (max === 4) {
+    return {
+      class: 'four',
+      tieBreakers: [counts.indexOf(4), counts.indexOf(1)], // which value is repeated 4 times, then kicker
+    }
+  }
+
+
+
+  if (max === 3) {
+    const v = counts.indexOf(3)
+    const p = counts.indexOf(2)
+
+    if (p !== -1) {
       return {
-        class: 'five',
-        tieBreakers: [counts.indexOf(5)], // which value is repeated 5 times
+        class: 'full-house',
+        tieBreakers: [v, p],
       }
-    }
-    case 4: {
+    } else {
       return {
-        class: 'four',
-        tieBreakers: [counts.indexOf(4), counts.indexOf(1)], // which value is repeated 4 times, then kicker
+        class: 'threes',
+        tieBreakers: [v, kickers[0], kickers[1]],
       }
     }
-    case 3: {
-      const v = counts.indexOf(3)
-      const p = counts.indexOf(2)
+  }
 
-      if (p !== -1) {
-        return {
-          class: 'full-house',
-          tieBreakers: [v, p],
-        }
-      } else {
-        return {
-          class: 'threes',
-          tieBreakers: [v, kickers[0], kickers[1]],
-        }
-      }
-    }
-    case 2: {
-      // only 1 or 2 pairs possible, so we can just loop once and check counts
-      const highestIdx = counts.lastIndexOf(2) //higher value idx
-      const lowestIdx = counts.indexOf(2)
+  if (max === 2) {
+    // only 1 or 2 pairs possible, so we can just loop once and check counts
+    const highestIdx = counts.lastIndexOf(2) //higher value idx
+    const lowestIdx = counts.indexOf(2)
 
-      // if we are already in pairs branch
-      // both can't be -1
-      if (lowestIdx !== highestIdx) {
-        return {
-          class: 'two-pairs',
-          tieBreakers: [highestIdx, lowestIdx, kickers[0]],
-        }
-      }
-
+    // if we are already in pairs branch
+    // both can't be -1
+    if (lowestIdx !== highestIdx) {
       return {
-        class: 'pair',
-        tieBreakers: [highestIdx, ...kickers],
+        class: 'two-pairs',
+        tieBreakers: [highestIdx, lowestIdx, kickers[0]],
       }
     }
-    case 1:
-      {
-        let mask = 0
-        for (const d of dice) {
-          mask |= 1 << (d - 1)
 
-          if (mask === 0b011111) {
-            return { class: 'small-straight', tieBreakers: [] }
-          }
+    return {
+      class: 'pair',
+      tieBreakers: [highestIdx, kickers[0], kickers[1], kickers[2]],
+    }
+  }
 
-          if (mask === 0b111110) {
-            return { class: 'big-straight', tieBreakers: [] }
-          }
-        }
-      }
-      break
+  let mask = 0
+  for (const d of dice) {
+    mask |= 1 << (d - 1)
+
+    if (mask === 0b011111) {
+      return { class: 'small-straight', tieBreakers: EMPTY_TIEBREAKERS }
+    }
+
+    if (mask === 0b111110) {
+      return { class: 'big-straight', tieBreakers: EMPTY_TIEBREAKERS }
+    }
   }
 
   return {
     class: 'nothing',
-    tieBreakers: sorted,
+    tieBreakers: dice.sort(desc),
   }
 }
 
