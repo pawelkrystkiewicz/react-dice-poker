@@ -1,5 +1,7 @@
 # react-dice-poker
 
+[![Performance: 21× speedup](https://img.shields.io/badge/perf-21×_speedup-brightgreen)](PERFORMANCE.md)
+
 A browser implementation of the **dice poker minigame from The Witcher 1**, used as a personal exercise for the hand-evaluation algorithm.
 
 The UI, AI scaffolding, and game flow are implemented. `evaluateHand()` in [src/evaluator.ts](src/evaluator.ts) is intentionally left for the project owner to write — first for correctness against a fixed test suite, then for speed against a benchmark.
