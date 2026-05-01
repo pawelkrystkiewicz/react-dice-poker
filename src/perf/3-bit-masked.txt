@@ -1,0 +1,31 @@
+ ✓ src/evaluator.bench.ts > evaluateHand: per class 9752ms
+     name                      hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · nothing         4,648,649.02  0.0001  1.2814  0.0002  0.0002  0.0004  0.0005  0.0008  ±0.61%  2324325
+   · pair            2,994,932.69  0.0002  0.1745  0.0003  0.0003  0.0005  0.0006  0.0008  ±0.24%  1497467
+   · two-pairs       4,066,689.75  0.0002  0.1160  0.0002  0.0003  0.0003  0.0004  0.0006  ±0.18%  2033345
+   · threes          5,317,978.59  0.0001  3.6213  0.0002  0.0002  0.0003  0.0004  0.0007  ±1.50%  2658990
+   · small-straight  6,216,149.22  0.0001  0.2344  0.0002  0.0002  0.0003  0.0003  0.0005  ±0.29%  3108075
+   · big-straight    5,495,647.24  0.0001  1.2539  0.0002  0.0002  0.0003  0.0004  0.0007  ±0.77%  2747824
+   · full-house      5,929,498.77  0.0001  0.1740  0.0002  0.0002  0.0003  0.0003  0.0005  ±0.28%  2964750
+   · four            6,018,502.17  0.0001  0.1482  0.0002  0.0002  0.0002  0.0003  0.0005  ±0.17%  3009252
+   · five            6,157,199.90  0.0001  2.8777  0.0002  0.0002  0.0002  0.0003  0.0005  ±1.15%  3078600
+
+ ✓ src/evaluator.bench.ts > evaluateHand: aggregate 1534ms
+     name                                          hz     min     max    mean     p75     p99    p995    p999     rme  samples
+   · all 7776 ordered dice combinations        445.44  2.0828  2.4209  2.2449  2.2867  2.3908  2.3999  2.4209  ±0.38%      223
+   · uniform random roll (single)        3,077,095.59  0.0001  0.0990  0.0003  0.0004  0.0005  0.0006  0.0008  ±0.18%  1538548
+
+ BENCH  Summary
+
+  small-straight - src/evaluator.bench.ts > evaluateHand: per class
+    1.01x faster than five
+    1.03x faster than four
+    1.05x faster than full-house
+    1.13x faster than big-straight
+    1.17x faster than threes
+    1.34x faster than nothing
+    1.53x faster than two-pairs
+    2.08x faster than pair
+
+  uniform random roll (single) - src/evaluator.bench.ts > evaluateHand: aggregate
+    6907.92x faster than all 7776 ordered dice combinations

@@ -1,5 +1,8 @@
 import type { DiceSet, HandResult } from './types'
 const desc = (a: number, b: number) => b - a
+
+const counts = new Uint8Array(7) // module scope, indices 0..6, slot 0 unused
+
 /**
  * STUB — implement this yourself.
  *
@@ -14,8 +17,8 @@ const desc = (a: number, b: number) => b - a
  *   small-straight  1..5, no repeats                [5,3,1,4,2]
  *   big-straight    2..6, no repeats                [5,2,4,1,6]
  *   full-house      pair + threes                   [1,1,1,5,5]
- *   four (Kareta)   4 of a kind                     [3,3,3,3,2]
- *   five (Poker)    5 of a kind                     [2,2,2,2,2]
+ *   four            4 of a kind                     [3,3,3,3,2]
+ *   five            5 of a kind                     [2,2,2,2,2]
  *
  * Tie-breaker conventions (used by the comparator):
  *   - Higher hand class wins outright.
@@ -29,97 +32,99 @@ const desc = (a: number, b: number) => b - a
  *       straights   -> [highestDie]  (or [] — they only differ by class)
  *       nothing     -> dice values sorted descending
  */
-export function evaluateHand(_dice: DiceSet): HandResult {
-  const counts = new Map<number, number>()
-  for (const d of _dice) counts.set(d, (counts.get(d) ?? 0) + 1)
+export function evaluateHand(dice: DiceSet): HandResult {
+  // reset counts for this hand, reuse module-scope array to avoid allocations
+  counts.fill(0)
 
-  const tieBreakers = [..._dice].sort(desc)
-  const entries = [...counts.entries()].sort()
-  const uniqueValues = [...new Set(_dice)].sort(desc)
+  for (const d of dice) {
+    // dice [index] is assigned value
+    // array[1] = count 1s
+    // array[2] = count 2s
+    counts[d]++
+  }
 
-  const pairs = []
-  const threes = []
-  const fours = []
-  const fives = []
-
-  for (const [diceValue, count] of entries) {
-
-    switch (count) {
-      case 2:
-        pairs.push(diceValue)
-        break
-      case 3:
-        threes.push(diceValue)
-        break
-      case 4:
-        fours.push(diceValue)
+  switch (Math.max(...counts)) {
+    case 5: {
+      return {
+        class: 'five',
+        tieBreakers: [counts.indexOf(5)], // which value is repeated 5 times
+      }
+    }
+    case 4: {
+      return {
+        class: 'four',
+        tieBreakers: [counts.indexOf(4), counts.indexOf(1)], // which value is repeated 4 times, then kicker
+      }
+    }
+    case 3: {
+      const v = counts.indexOf(3)
+      const p = counts.indexOf(2)
+      if (p !== -1) {
         return {
-          class: 'four',
-          tieBreakers: [diceValue, ...uniqueValues.filter(v => v !== diceValue)],
+          class: 'full-house',
+          tieBreakers: [v, p],
         }
-      case 5:
-        fives.push(diceValue)
+      } else {
+        const kickers = []
+        for (let i = 6; i > 0; i--) {
+          if (counts[i] === 1) kickers.push(i)
+        }
         return {
-          class: 'five',
-          tieBreakers: [diceValue],
+          class: 'threes',
+          tieBreakers: [v, ...kickers],
         }
+      }
     }
-  }
+    case 2: {
+      // only 1 or 2 pairs possible, so we can just loop once and check counts
+      const indexes = counts.filter(c => c === 2)
 
-  if (pairs.length === 2) {
-    const [p1, p2] = pairs.sort(desc)
-    return {
-      class: 'two-pairs',
-      tieBreakers: [p1, p2, ...uniqueValues.filter(v => v !== p1 && v !== p2)],
+      if (indexes[1]) {
+        const pairs: number[] = []
+        let kicker = -1
+
+        for (let i = 6; i > 0; i--) {
+          if (counts[i] === 2) pairs.push(i)
+          else if (counts[i] === 1) kicker = i
+        }
+        return {
+          class: 'two-pairs',
+          tieBreakers: [pairs[0], pairs[1], kicker],
+        }
+      }
+
+      return {
+        class: 'pair',
+        tieBreakers: [
+          //
+          counts.indexOf(2),
+          ...dice.filter(d => d !== counts.indexOf(2)).sort(desc),
+        ],
+      }
     }
-  }
+    case 1:
+      {
+        let mask = 0
+        for (const d of dice) {
+          mask |= 1 << (d - 1)
+          // small-straight: mask === 0b011111 (31)
+          // big-straight:   mask === 0b111110 (62)}
 
-  if (threes.length === 1 && pairs.length === 1) {
-    const [tripleValue] = threes
-    const [pairValue] = pairs
-    return {
-      class: 'full-house',
-      tieBreakers: [tripleValue, pairValue],
-    }
-  }
+          if (mask === 0b011111) {
+            return { class: 'small-straight', tieBreakers: [] }
+          }
 
-  if (threes.length === 1) {
-    const [tripleValue] = threes
-    return {
-      class: 'threes',
-      tieBreakers: [tripleValue, ...uniqueValues.filter(v => v !== tripleValue)],
-    }
-  }
-
-  if (pairs.length === 1) {
-    const [pairValue] = pairs
-    return {
-      class: 'pair',
-      tieBreakers: [pairValue, ...uniqueValues.filter(v => v !== pairValue)],
-    }
-  }
-
-  const isSmallStraight = [1, 2, 3, 4, 5].every(v => counts.has(v))
-
-  if (isSmallStraight) {
-    return {
-      class: 'small-straight',
-      tieBreakers: [5],
-    }
-  }
-
-  const isBigStraight = [2, 3, 4, 5, 6].every(v => counts.has(v))
-
-  if (isBigStraight) {
-    return {
-      class: 'big-straight',
-      tieBreakers: [6],
-    }
+          if (mask === 0b111110) {
+            return { class: 'big-straight', tieBreakers: [] }
+          }
+        }
+      }
+      break
   }
 
   return {
     class: 'nothing',
-    tieBreakers,
+    tieBreakers: [...dice].sort(desc),
   }
 }
 
